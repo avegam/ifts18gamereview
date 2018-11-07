@@ -1,0 +1,28 @@
+{% extends "index.html" %}
+
+{% block content %}
+  <div class="row">
+
+    <div class="col-md-6 col-md-offset-3">
+      <h2>Agregar Comentario</h2>
+      <form method="post">
+	   <input type="hidden" id="custId" name="autor" value={{idau}}>
+        <p>Titulo</p>
+        <input type="text" class="form-control" name="titulo">
+        <br>
+		<p>puntaje</p>
+        <input type="text" class="form-control" name="puntaje">
+        <br>
+        <p>Comentarios</p>
+        <textarea name="contenido" class="form-control" rows="5"></textarea>
+        <br>
+		<select name="consola">
+		{%for x in range(listaconsola|length):%}
+		  <option value={{listaconsola[x][0]}}>{{listaconsola[x][1]}}</option>
+		{%endfor%}
+		</select>
+        <button type="submit">Guardar</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}
