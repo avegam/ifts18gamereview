@@ -4,7 +4,7 @@ from flask import session as login_session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from functools import wraps
-from database_setup import Base, Blog, User,Consola,Genero,Generos,Reviewjuego,imagenes,puntaje
+from database_setup import Base, Blog, User,Consola,Genero,Generos,Reviewjuego,Imagenes,Puntaje
 from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
 import random
 import string
@@ -336,8 +336,13 @@ def addgenero():
 @app.route('/', methods=['GET'])
 @app.route('/public/', methods=['GET'])
 def showMain():
-	posts = session.query(Reviewjuego).join(User,id_autor == user.id)
+	posts = session.query(Reviewjuego,User).join(User,Reviewjuego.id_autor == User.id).all()
+	#posts = session.query(Reviewjuego).join(User).all()
+	#d = dir(posts)
+
 	
+
+	print posts
 	if 'username' in login_session:
 		username = login_session['username']
 		
