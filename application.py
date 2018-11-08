@@ -238,14 +238,46 @@ def registrar():
 # Delete post
 @app.route('/blog/eliminar/<int:id>', methods=['GET', 'POST'])
 def eliminarItem(id):
-
+	
 	post = session.query(Blog).filter_by(id = id).one()
 
 	if request.method == 'GET':
-		return render_template('delete-post.html', post = post)
+		if 'username' in login_session:
+			username = login_session['username']
+		return render_template('delete-post.html', post = post, username=login_session['username'])
 	else:
 		if request.method == 'POST':
 			session.delete(post)
+			session.commit()
+			return redirect(url_for('showMain'))
+			
+# Delete postrevierw
+@app.route('/blogreview/eliminar/<int:id>', methods=['GET', 'POST'])
+def eliminarItemrevie(id):
+
+	post = session.query(Reviewjuego,User,Consola).join(User,Reviewjuego.id_autor == User.id).join(Consola,Reviewjuego.id_consola == Consola.id).filter(Reviewjuego.id == id).one()
+	postr = session.query(Reviewjuego).filter_by(id = id).one()
+	if request.method == 'GET':
+		return render_template('delete-review.html', post = post)
+	else:
+		if request.method == 'POST':
+			session.delete(postr)
+			session.commit()
+			return redirect(url_for('showMain'))
+			
+# update postrevierw
+@app.route('/blogreview/editar/<int:id>', methods=['GET', 'POST'])
+def EditarItemrevie(id):	
+	if request.method == 'GET':
+		post = session.query(Reviewjuego,User,Consola).join(User,Reviewjuego.id_autor == User.id).join(Consola,Reviewjuego.id_consola == Consola.id).filter(Reviewjuego.id == id).one()
+		return render_template('Update-review.html', post = post)
+	else:
+		if request.method == 'POST':
+			postr = session.query(Reviewjuego).filter_by(id = id).one()
+			postr.titulo = request.form['titulo']
+			postr.contenido = request.form['contenido']
+			postr.puntaje = request.form['puntaje']
+			
 			session.commit()
 			return redirect(url_for('showMain'))
 					 
@@ -336,13 +368,12 @@ def addgenero():
 @app.route('/', methods=['GET'])
 @app.route('/public/', methods=['GET'])
 def showMain():
-	posts = session.query(Reviewjuego,User).join(User,Reviewjuego.id_autor == User.id).all()
+	posts = session.query(Reviewjuego,User,Consola).join(User,Reviewjuego.id_autor == User.id).join(Consola,Reviewjuego.id_consola == Consola.id).all()
+	#posts = session.query(Reviewjuego,User).join(User,Reviewjuego.id_autor == User.id).all()
+	
 	#posts = session.query(Reviewjuego).join(User).all()
 	#d = dir(posts)
-
-	
-
-	print posts
+	#print posts
 	if 'username' in login_session:
 		username = login_session['username']
 		

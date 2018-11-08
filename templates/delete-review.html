@@ -1,8 +1,12 @@
-{% extends "index.html" %}
+{% extends "index.html" %} 
 
-{% block content %}
-  {% for post in posts %}
-    <div class="row post">
+{% block content %} 
+
+  
+  <div class="row text-center">
+    <h2>Estas seguro que quiere borrar este Post?</h2>
+  </div>
+  <div class="row post">
 		<div class="col-md-3">
 		</div>
       <div class="col-md-6">
@@ -22,17 +26,17 @@
 	  <p class="text-right">Puntaje{{post.Reviewjuego.puntaje}}</p>
 	  <p class="text-right text-bottom">Autor:{{post.User.username}}</p>
       </div>
-      
-	  
-      {% if username == post.User.username %}
-					
-				
-      <div class="col-md-12 acciones">
-        <a href="/blogreview/editar/{{post.Reviewjuego.id}}"><i class="fa fa-pencil fa-fw"></i>Editar</a>
-        <a href="/blogreview/eliminar/{{post.Reviewjuego.id}}"><i class="fa fa-trash-o fa-fw"></i>Eliminar</a>
-      </div>
-	  {% endif %}
-       </div>  
-   
-  {% endfor%}
+    </div>
+
+  <br>
+ 
+  <form action="/blogreview/eliminar/{{post.Reviewjuego.id}}" method = 'post'>
+    <button type="submit" class="btn btn-danger" id="submit" type="submit">Yes</button>
+    <a class="btn btn-primary" href="/" role="button">No</a>
+  </form>  
+ 
+  
+
 {% endblock %}
+
+
