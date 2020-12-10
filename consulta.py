@@ -34,7 +34,6 @@ def VerGenero():
 		generito = session.query(Genero).all()
 		return generito
 def Search():		
-		if request.method == 'POST':
 			
 			if request.form['Search'] == "Busqueda":
 				buscar = request.form['Busqueda']

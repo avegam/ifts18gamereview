@@ -32,11 +32,14 @@
 	  		{% endfor%}
       </div>
       
-	  
+	  <div class="col-md-12 acciones">
+      	<a href="/blogreview/View/{{post.Reviewjuego.id}}"><i class="fa fa-pencil fa-fw"></i>Ver</a>
+      </div>
       {% if username == post.User.username %}
 					
 				
       <div class="col-md-12 acciones">
+
         <a href="/blogreview/editar/{{post.Reviewjuego.id}}"><i class="fa fa-pencil fa-fw"></i>Editar</a>
         <a href="/blogreview/eliminar/{{post.Reviewjuego.id}}"><i class="fa fa-trash-o fa-fw"></i>Eliminar</a>
       </div>

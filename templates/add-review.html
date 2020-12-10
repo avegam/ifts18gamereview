@@ -21,6 +21,10 @@
 		  <option value={{listaconsola[x][0]}}>{{listaconsola[x][1]}}</option>
 		{%endfor%}
 		</select>
+		{%for GeneroNav in generos %}
+			<label for={{GeneroNav.nombre_genero}}>{{GeneroNav.nombre_genero}}</label>
+			<input type="checkbox" name ={{GeneroNav.nombre_genero}} id={{GeneroNav.id}}>
+		{%endfor%}
         <button type="submit">Guardar</button>
       </form>
     </div>
