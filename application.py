@@ -13,6 +13,7 @@ import datetime
 import hashlib
 import httplib2
 import requests
+from consulta import VerConsolas,VerGenero,Search,LosGenero#,VerSearch,VerSearchConsola
 
 app = Flask(__name__)
 
@@ -25,6 +26,9 @@ Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+#Consultas Genericas
+ConsolasNAV = VerConsolas()
+GenerosNAV = VerGenero()
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -34,7 +38,7 @@ def login():
 				string.ascii_uppercase + string.digits) for x in range(32))
 		# store it in session for later use
 		login_session['state'] = state
-		return render_template('login.html', STATE = state)
+		return render_template('login.html', STATE = state,consolas=ConsolasNAV,generos=GenerosNAV)
 	else:
 		if request.method == 'POST':
 			print ("dentro de POST login")
@@ -46,11 +50,11 @@ def login():
 								user.pw_hash):
 			
 				login_session['username'] = request.form['username']				
-				return render_template('public.html', username=login_session['username'])
+				return render_template('public.html', username=login_session['username'],consolas=ConsolasNAV,generos=GenerosNAV)
 
 			else:
 				error = "Usuario no registrado!!!"
-				return render_template('login.html', error = error)
+				return render_template('login.html', error = error,consolas=ConsolasNAV,generos=GenerosNAV)
 				
 # GConnect
 @app.route('/gconnect', methods=['POST'])
@@ -210,14 +214,14 @@ def logout():
 		
 		del login_session['username']
 
-		return render_template('public.html')
+		return render_template('public.html',consolas=ConsolasNAV,generos=GenerosNAV)
 
 # Crear usuario
 @app.route('/registrar', methods=['GET', 'POST'])
 def registrar():
 
 	if request.method == 'GET':
-		return render_template('add-user.html')
+		return render_template('add-user.html',consolas=ConsolasNAV,generos=GenerosNAV)
 	else:
 		if request.method == 'POST':
 			username = request.form['username']
@@ -244,7 +248,7 @@ def eliminarItem(id):
 	if request.method == 'GET':
 		if 'username' in login_session:
 			username = login_session['username']
-		return render_template('delete-post.html', post = post, username=login_session['username'])
+		return render_template('delete-post.html', post = post, username=login_session['username'],consolas=ConsolasNAV,generos=GenerosNAV)
 	else:
 		if request.method == 'POST':
 			session.delete(post)
@@ -258,7 +262,7 @@ def eliminarItemrevie(id):
 	post = session.query(Reviewjuego,User,Consola).join(User,Reviewjuego.id_autor == User.id).join(Consola,Reviewjuego.id_consola == Consola.id).filter(Reviewjuego.id == id).one()
 	postr = session.query(Reviewjuego).filter_by(id = id).one()
 	if request.method == 'GET':
-		return render_template('delete-review.html', post = post)
+		return render_template('delete-review.html', post = post,consolas=ConsolasNAV,generos=GenerosNAV)
 	else:
 		if request.method == 'POST':
 			session.delete(postr)
@@ -270,7 +274,7 @@ def eliminarItemrevie(id):
 def EditarItemrevie(id):	
 	if request.method == 'GET':
 		post = session.query(Reviewjuego,User,Consola).join(User,Reviewjuego.id_autor == User.id).join(Consola,Reviewjuego.id_consola == Consola.id).filter(Reviewjuego.id == id).one()
-		return render_template('Update-review.html', post = post)
+		return render_template('Update-review.html', post = post,consolas=ConsolasNAV,generos=GenerosNAV)
 	else:
 		if request.method == 'POST':
 			postr = session.query(Reviewjuego).filter_by(id = id).one()
@@ -287,7 +291,7 @@ def EditarItemrevie(id):
 def agregarPost():
 
 	if request.method == 'GET':
-		return render_template('add-post.html')
+		return render_template('add-post.html',consolas=ConsolasNAV,generos=GenerosNAV)
 	else:
 		if request.method == 'POST':
 			post = Blog(
@@ -301,7 +305,7 @@ def agregarPost():
 #crear review
 @app.route('/agregarreview', methods=['GET', 'POST'])
 def agregarPostreview():
-
+	
 	if request.method == 'GET':
 		if 'username' in login_session:
 			username = login_session['username']
@@ -314,7 +318,7 @@ def agregarPostreview():
 			consolalist = []
 			for x in consola:
 				consolalist.append([x.id,x.nombre_consola])
-			return render_template('add-review.html',username=username,idau=idautor,listaconsola = consolalist)
+			return render_template('add-review.html',username=username,idau=idautor,listaconsola = consolalist,consolas=ConsolasNAV,generos=GenerosNAV)
 	else:
 		if request.method == 'POST':
 			review = Reviewjuego(
@@ -333,7 +337,7 @@ def agregarPostreview():
 def addconsol():
 
 	if request.method == 'GET':
-		return render_template('add-console.html')
+		return render_template('add-console.html',consolas=ConsolasNAV,generos=GenerosNAV)
 	else:
 		if request.method == 'POST':
 			consola = request.form['consola']
@@ -345,12 +349,19 @@ def addconsol():
 			session.commit()
 			return redirect(url_for('showMain'))
 			
+# VER postrevierw
+@app.route('/blogreview/View/<int:id>', methods=['GET'])
+def Verreview(id):	
+
+		post = session.query(Reviewjuego,User,Consola).join(User,Reviewjuego.id_autor == User.id).join(Consola,Reviewjuego.id_consola == Consola.id).filter(Reviewjuego.id == id).one()
+		return render_template('Post.html', post = post,consolas=ConsolasNAV,generos=GenerosNAV)
+			
 #crear genero
 @app.route('/addgenero', methods=['GET', 'POST'])
 def addgenero():
 
 	if request.method == 'GET':
-		return render_template('add-genero.html')
+		return render_template('add-genero.html',consolas=ConsolasNAV,generos=GenerosNAV)
 	else:
 		if request.method == 'POST':
 			genero = request.form['genero']
@@ -366,20 +377,82 @@ def addgenero():
 
 # Show all
 @app.route('/', methods=['GET'])
-@app.route('/public/', methods=['GET'])
+@app.route('/public/', methods=['GET', 'POST'])
 def showMain():
-	posts = session.query(Reviewjuego,User,Consola).join(User,Reviewjuego.id_autor == User.id).join(Consola,Reviewjuego.id_consola == Consola.id).all()
-	#posts = session.query(Reviewjuego,User).join(User,Reviewjuego.id_autor == User.id).all()
-	
-	#posts = session.query(Reviewjuego).join(User).all()
-	#d = dir(posts)
-	#print posts
+	if request.method == 'GET':
+		posts = session.query(Reviewjuego,User,Consola).join(User,Reviewjuego.id_autor == User.id).join(Consola,Reviewjuego.id_consola == Consola.id).all()
+		#posts = session.query(Reviewjuego,User).join(User,Reviewjuego.id_autor == User.id).all()
+		
+		#posts = session.query(Reviewjuego).join(User).all()
+		#d = dir(posts)
+		#print posts
+		if 'username' in login_session:
+			username = login_session['username']
+			
+			return render_template('public.html', posts = posts, username=username,consolas=ConsolasNAV,generos=GenerosNAV)	
+		else:
+			return render_template('public.html', posts = posts,consolas=ConsolasNAV,generos=GenerosNAV)
+	else:
+		if request.method == 'POST':
+			
+			if request.form['Search'] == "Busqueda":
+				buscar = request.form['Busqueda']
+				return redirect(url_for('Verreviewtitu',id = buscar))
+
+
+#@app.route('/Search/Titulo/<id>', methods=['GET'])
+@app.route('/Search/Titulo/<string:id>', methods=['GET', 'POST'])
+def Verreviewtitu(id):
+	if request.method == 'GET':
+		id = str(id)	
+		ID = "%{}%".format(id)
+		
+		posts = session.query(Reviewjuego,User,Consola).join(User,Reviewjuego.id_autor == User.id).join(Consola,Reviewjuego.id_consola == Consola.id).filter(Reviewjuego.titulo.like(ID)).all()
+		
+		return render_template('Search.html', posts = posts,consolas=ConsolasNAV,generos=GenerosNAV)
+	else:
+		return Search()
+		
+@app.route('/Search/Consola/<int:id>', methods=['GET'])
+def searchConsola(id):
+
+	#posts = VerSearchConsola(id)
+	posts = session.query(Reviewjuego,User,Consola).join(User,Reviewjuego.id_autor == User.id).join(Consola,Reviewjuego.id_consola == Consola.id).filter(Reviewjuego.id_consola == id).all()
 	if 'username' in login_session:
 		username = login_session['username']
 		
-		return render_template('public.html', posts = posts, username=username)	
+		return render_template('Search.html', posts = posts, username=username,consolas=ConsolasNAV,generos=GenerosNAV)	
 	else:
-		return render_template('public.html', posts = posts)
+		return render_template('Search.html', posts = posts,consolas=ConsolasNAV,generos=GenerosNAV)
+		
+@app.route('/Search/Genero/<int:id>', methods=['GET'])
+def searchGenero(id):
+
+	#posts = VerSearch(ID)
+	posts = session.query(Reviewjuego,User,Consola,Generos).join(User,Reviewjuego.id_autor == User.id).join(Consola,Reviewjuego.id_consola == Consola.id).join(Generos,Reviewjuego.id == Generos.id_juego).filter(Generos.id_genero == id).all()
+	
+	
+	
+	
+	list1 = []
+	for post in posts:
+		idjuego = post.Reviewjuego.id
+		print(idjuego)
+		generitos = session.query(Genero,Generos).join(Generos,Generos.id_genero == Genero.id).filter(Generos.id_juego == idjuego).all()
+		list = [idjuego]
+		list1.append(list)
+		for gen in generitos:
+			genes = str(gen.Genero.nombre_genero)
+			list.append(genes)
+	print (list1)
+	#cosa = LosGenero(posts)
+	#print (cosa)
+	if 'username' in login_session:
+		username = login_session['username']
+		
+		return render_template('Search.html', posts = posts, username=username,listageneros=list1,consolas=ConsolasNAV,generos=GenerosNAV)	
+	else:
+		return render_template('Search.html', posts = posts,listageneros=list1,consolas=ConsolasNAV,generos=GenerosNAV)
 		
 		
 
@@ -390,9 +463,9 @@ def showMainda():
 	if 'username' in login_session:
 		username = login_session['username']
 		
-		return render_template('public.html', posts = posts, username=username)	
+		return render_template('public.html', posts = posts, username=username,consolas=ConsolasNAV,generos=GenerosNAV)	
 	else:
-		return render_template('public.html', posts = posts)
+		return render_template('public.html', posts = posts,consolas=ConsolasNAV,generos=GenerosNAV)
 
 if __name__ == '__main__':
 	app.secret_key = "secret key"
