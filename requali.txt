@@ -76,7 +76,7 @@ requests==2.22.0
 requests-file==1.5.1
 requests-ftp==0.3.1
 requests-unixsocket==0.2.0
-rsa==4.6
+rsa==4.7
 scikit-learn==0.23.2
 scipy==1.5.4
 SecretStorage==2.3.1
